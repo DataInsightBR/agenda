@@ -1,0 +1,82 @@
+<!DOCTYPE html> <html lang="pt-BR"> <head> <meta charset="UTF-8"> <title>Agenda de Contatos</title> <style> body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; } .container { max-width: 900px; margin: 40px auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); } h1 { text-align: center; color: #333; } .form { display: flex; gap: 10px; margin-bottom: 20px; } .form input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; } .form button { padding: 10px 15px; border: none; border-radius: 6px; background: #007bff; color: white; cursor: pointer; } .form button:hover { background: #0056b3; } table { width: 100%; border-collapse: collapse; } th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; } th { background: #007bff; color: white; } .actions button { margin-right: 5px; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; } .edit { background: #ffc107; color: #000; } .delete { background: #dc3545; color: white; } .save { background: #28a745; color: white; } </style> </head> <body> <div class="container"> <h1>Agenda de Contatos</h1> <div class="form"> <input type="text" id="nome" placeholder="Nome"> <input type="text" id="endereco" placeholder="Endereço"> <input type="text" id="whatsapp" placeholder="WhatsApp"> <button onclick="adicionarContato()">Adicionar</button> </div> <table> <thead> <tr> <th>Nome</th> <th>Endereço</th> <th>WhatsApp</th> <th>Ações</th> </tr> </thead> <tbody id="lista"></tbody> </table> </div>
+
+
+
+<script>
+  let contatos = JSON.parse(localStorage.getItem('contatos')) || [];
+  let editIndex = null;
+
+  function salvarLocalStorage() {
+    localStorage.setItem('contatos', JSON.stringify(contatos));
+  }
+
+  function adicionarContato() {
+    const nome = document.getElementById('nome').value;
+    const endereco = document.getElementById('endereco').value;
+    const whatsapp = document.getElementById('whatsapp').value;
+
+    if (!nome || !endereco || !whatsapp) {
+      alert('Preencha todos os campos!');
+      return;
+    }
+
+    if (editIndex === null) {
+      contatos.push({ nome, endereco, whatsapp });
+    } else {
+      contatos[editIndex] = { nome, endereco, whatsapp };
+      editIndex = null;
+    }
+
+    salvarLocalStorage();
+    limparCampos();
+    render();
+  }
+
+  function render() {
+    const lista = document.getElementById('lista');
+    lista.innerHTML = '';
+
+    contatos.forEach((c, index) => {
+      const row = `
+        <tr>
+          <td>${c.nome}</td>
+          <td>${c.endereco}</td>
+          <td>${c.whatsapp}</td>
+          <td class="actions">
+            <button class="edit" onclick="editarContato(${index})">Editar</button>
+            <button class="delete" onclick="excluirContato(${index})">Excluir</button>
+          </td>
+        </tr>
+      `;
+      lista.innerHTML += row;
+    });
+  }
+
+  function editarContato(index) {
+    const contato = contatos[index];
+    document.getElementById('nome').value = contato.nome;
+    document.getElementById('endereco').value = contato.endereco;
+    document.getElementById('whatsapp').value = contato.whatsapp;
+    editIndex = index;
+  }
+
+  function excluirContato(index) {
+    if (confirm('Deseja excluir este contato?')) {
+      contatos.splice(index, 1);
+      salvarLocalStorage();
+      render();
+    }
+  }
+
+  function limparCampos() {
+    document.getElementById('nome').value = '';
+    document.getElementById('endereco').value = '';
+    document.getElementById('whatsapp').value = '';
+  }
+
+  // Carrega os contatos ao abrir a página
+  render();
+</script>
+
+
+</body> </html>
